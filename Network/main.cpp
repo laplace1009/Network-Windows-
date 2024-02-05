@@ -1,8 +1,6 @@
-#include <iostream>
-#include <Windows.h>
-#include <WinSock2.h>
+#include "pch.h"
 
 int main()
 {
-
+	
 }
