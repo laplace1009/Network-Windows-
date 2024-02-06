@@ -1,6 +1,8 @@
 #pragma once
 #include "Types.h"
 
+#define OUT
+
 #define CRASH(cause)					\
 {										\
 	uint32* crash = nullptr;				\
