@@ -68,3 +68,8 @@ auto TcpStream::GetBufPtr() -> BYTE*
 {
 	return mSocket.buf;
 }
+
+auto TcpStream::GetSocketInfoPtr() -> SocketInfo*
+{
+	return &mSocket;
+}

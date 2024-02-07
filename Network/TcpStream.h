@@ -35,11 +35,9 @@ public:
 	auto GetAddrPtr() -> SOCKADDR_IN*;
 	auto SetSocketOpt(int option) -> int;
 	auto GetBufPtr() -> BYTE*;
+	auto GetSocketInfoPtr() -> SocketInfo*;
 
 private:
 	SocketInfo mSocket;
-	/*SOCKET mSocket;
-	SOCKADDR_IN mAddr;
-	BYTE* mBuf;*/
 };
 
