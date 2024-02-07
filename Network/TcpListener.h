@@ -10,6 +10,7 @@ public:
 	auto Accept() -> std::optional<TcpStream>;
 	auto Recv(OUT TcpStream* client) -> int;
 	auto Send(TcpStream* client, int retVal) -> int;
+	auto SwitchSyncAsync(u_long swt) -> int;
 
 private:
 	TcpStream mServer;

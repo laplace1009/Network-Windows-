@@ -154,6 +154,7 @@
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Select.cpp" />
     <ClCompile Include="TcpListener.cpp" />
     <ClCompile Include="TcpStream.cpp" />
   </ItemGroup>
@@ -162,6 +163,7 @@
     <ClInclude Include="Error.h" />
     <ClInclude Include="Macro.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Select.h" />
     <ClInclude Include="TcpListener.h" />
     <ClInclude Include="TcpStream.h" />
     <ClInclude Include="Types.h" />

@@ -26,10 +26,16 @@ auto TcpListener::Accept() -> std::optional<TcpStream>
 
 auto TcpListener::Recv(OUT TcpStream* client) -> int
 {
-	return recv(*client->GetSocketPtr(), client->GetBufPtr(), sizeof(*client->GetAddrPtr()), 0);
+	return recv(*client->GetSocketPtr(), reinterpret_cast<char*>(client->GetBufPtr()), sizeof(*client->GetAddrPtr()), 0);
 }
 
 auto TcpListener::Send(TcpStream* client, int retVal) -> int
 {
-	return send(*client->GetSocketPtr(), client->GetBufPtr(), retVal, 0);
+	return send(*client->GetSocketPtr(), reinterpret_cast<char*>(client->GetBufPtr()), retVal, 0);
 }
+
+auto TcpListener::SwitchSyncAsync(u_long swt) -> int
+{
+	return ioctlsocket(*mServer.GetSocketPtr(), FIONBIO, &swt);
+}
+

@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <string_view>
+#include <vector>
 
 #include <Windows.h>
 #include <WinSock2.h>
