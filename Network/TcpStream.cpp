@@ -47,28 +47,6 @@ auto TcpStream::Send(BYTE* message) -> int
 	return sendMsgLength;
 }
 
-auto TcpStream::GetSocketPtr() -> SOCKET*
-{
-	return &mSocket.socket;
-}
-
-auto TcpStream::GetAddrPtr() -> SOCKADDR_IN*
-{
-	return &mSocket.addr;
-}
-
-auto TcpStream::SetSocketOpt(int option) -> int
-{
-	int bOptVal = true;
-	int iOptLen = sizeof(int);
-	return setsockopt(mSocket.socket, SOL_SOCKET, option, reinterpret_cast<char*>(&bOptVal), iOptLen);
-}
-
-auto TcpStream::GetBufPtr() -> BYTE*
-{
-	return mSocket.buf;
-}
-
 auto TcpStream::GetSocketInfoPtr() -> SocketInfo*
 {
 	return &mSocket;

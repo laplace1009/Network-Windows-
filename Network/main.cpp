@@ -29,5 +29,8 @@ int main()
 	}
 
 	WSACleanup();
+
+	int* ptr = new int(3);
+	int& a = *ptr;
 	return 0;
 }

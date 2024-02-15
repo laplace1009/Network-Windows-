@@ -31,10 +31,7 @@ public:
 	auto Send(BYTE* message) -> int;
 
 public:
-	auto GetSocketPtr() -> SOCKET*;
-	auto GetAddrPtr() -> SOCKADDR_IN*;
 	auto SetSocketOpt(int option) -> int;
-	auto GetBufPtr() -> BYTE*;
 	auto GetSocketInfoPtr() -> SocketInfo*;
 
 private:

@@ -3,22 +3,22 @@
 
 auto TcpListener::Bind(std::string_view addr, uint16 port) -> void
 {
-	mServer.GetAddrPtr()->sin_family = AF_INET;
-	mServer.GetAddrPtr()->sin_addr.s_addr = htonl(INADDR_ANY);
-	mServer.GetAddrPtr()->sin_port = htons(port);
-	if (SOCKET_ERROR == bind(*mServer.GetSocketPtr(), reinterpret_cast<SOCKADDR*>(mServer.GetAddrPtr()), sizeof(*mServer.GetAddrPtr())))
+	mServer.GetSocketInfoPtr()->addr.sin_family = AF_INET;
+	mServer.GetSocketInfoPtr()->addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	mServer.GetSocketInfoPtr()->addr.sin_port = htons(port);
+	if (SOCKET_ERROR == bind(mServer.GetSocketInfoPtr()->socket, reinterpret_cast<SOCKADDR*>(&mServer.GetSocketInfoPtr()->addr), sizeof(mServer.GetSocketInfoPtr()->addr)))
 		return;
 
-	if (SOCKET_ERROR == listen(*mServer.GetSocketPtr(), SOMAXCONN))
+	if (SOCKET_ERROR == listen(mServer.GetSocketInfoPtr()->socket, SOMAXCONN))
 		return;
 }
 
 auto TcpListener::Accept() -> std::optional<TcpStream>
 {
 	TcpStream client;
-	int addrLen = sizeof(*client.GetAddrPtr());
-	*client.GetSocketPtr() = accept(*mServer.GetSocketPtr(), reinterpret_cast<SOCKADDR*>(client.GetAddrPtr()), &addrLen);
-	if (*client.GetSocketPtr() == INVALID_SOCKET)
+	int addrLen = sizeof(client.GetSocketInfoPtr()->addr);
+	client.GetSocketInfoPtr()->socket = accept(mServer.GetSocketInfoPtr()->socket, reinterpret_cast<SOCKADDR*>(&client.GetSocketInfoPtr()->addr), &addrLen);
+	if (client.GetSocketInfoPtr()->socket == INVALID_SOCKET)
 		return {};
 
 	return client;
@@ -26,16 +26,16 @@ auto TcpListener::Accept() -> std::optional<TcpStream>
 
 auto TcpListener::Recv(OUT TcpStream* client) -> int
 {
-	return recv(*client->GetSocketPtr(), reinterpret_cast<char*>(client->GetBufPtr()), sizeof(*client->GetAddrPtr()), 0);
+	return recv(client->GetSocketInfoPtr()->socket, reinterpret_cast<char*>(client->GetSocketInfoPtr()->buf), sizeof(client->GetSocketInfoPtr()->addr), 0);
 }
 
 auto TcpListener::Send(TcpStream* client, int retVal) -> int
 {
-	return send(*client->GetSocketPtr(), reinterpret_cast<char*>(client->GetBufPtr()), retVal, 0);
+	return send(client->GetSocketInfoPtr()->socket, reinterpret_cast<char*>(client->GetSocketInfoPtr()->buf), retVal, 0);
 }
 
 auto TcpListener::SwitchSyncAsync(u_long swt) -> int
 {
-	return ioctlsocket(*mServer.GetSocketPtr(), FIONBIO, &swt);
+	return ioctlsocket(mServer.GetSocketInfoPtr()->socket, FIONBIO, &swt);
 }
 
