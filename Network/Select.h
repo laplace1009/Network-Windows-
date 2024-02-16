@@ -7,14 +7,16 @@
 
 class Select
 {
+
 public:
-	Select();
+	auto Init() -> void;
+	auto Run(TcpListener& server, const timeval* time) -> int;
+	auto SubScribes(TcpStream&& stream) -> bool;
+	auto Recv() -> void;
+	auto Send() -> void;
 
 public:
 	auto GetSocketSize() -> uint64;
-	auto Start(TcpListener& server, timeval time) -> int;
-	auto SubScribes(TcpStream stream) -> void;
-	auto SubScribes(std::initializer_list<TcpStream> list) -> void;
 
 private:
 	std::vector<TcpStream> mStreams;
