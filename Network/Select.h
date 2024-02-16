@@ -11,9 +11,7 @@ class Select
 public:
 	auto Init() -> void;
 	auto Run(TcpListener& server, const timeval* time) -> int;
-	auto SubScribes(TcpStream&& stream) -> bool;
-	auto Recv() -> void;
-	auto Send() -> void;
+	auto SubScribe(TcpStream&& stream) -> bool;
 
 public:
 	auto GetSocketSize() -> uint64;

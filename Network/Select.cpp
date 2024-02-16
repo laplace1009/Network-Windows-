@@ -32,7 +32,7 @@ auto Select::Run(TcpListener& server, const timeval* time = nullptr) -> int
 	}
 }
 
-auto Select::SubScribes(TcpStream&& stream) -> bool
+auto Select::SubScribe(TcpStream&& stream) -> bool
 {
 	if (mStreams.size() + 1 <= FD_SETSIZE)
 		return false;
