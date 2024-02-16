@@ -47,6 +47,14 @@ auto TcpStream::Send(BYTE* message) -> int
 	return sendMsgLength;
 }
 
+auto TcpStream::SetSocketOpt(int option) -> int
+{
+	int optVal = true;
+	int optLen = sizeof(int);
+
+	return setsockopt(mSocket.socket, SOL_SOCKET, option, reinterpret_cast<char*>(&optVal), optLen);
+}
+
 auto TcpStream::GetSocketInfoPtr() -> SocketInfo*
 {
 	return &mSocket;

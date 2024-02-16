@@ -11,7 +11,7 @@ public:
 	auto Recv(OUT TcpStream* client) -> int;
 	auto Send(TcpStream* client, int retVal) -> int;
 	auto SwitchSyncAsync(u_long swt) -> int;
-
+	auto GetServerSocketPtr() -> TcpStream*;
 private:
 	TcpStream mServer;
 };
