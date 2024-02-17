@@ -6,7 +6,7 @@ auto Select::Init() -> void
 	mStreams.reserve(FD_SETSIZE);
 }
 
-auto Select::Run(TcpListener& server, const timeval* time = nullptr) -> int
+auto Select::Run(TcpListener& server, const timeval* time = nullptr) -> int32
 {
 	FD_ZERO(&mReads);
 	FD_ZERO(&mWrites);
@@ -22,15 +22,71 @@ auto Select::Run(TcpListener& server, const timeval* time = nullptr) -> int
 	if (retVal == SOCKET_ERROR)
 		return SOCKET_ERROR;
 
-	if (FD_ISSET(server.GetServerSocketPtr()->GetSocketInfoPtr()->socket, &mReads))
-	{
-		auto client = server.Accept();
-		if (client.has_value() == false)
-			return INVALID_SOCKET;
+	//if (FD_ISSET(server.GetServerSocketPtr()->GetSocketInfoPtr()->socket, &mReads))
+	//{
+	//	auto client = server.Accept();
+	//	if (client.has_value() == false)
+	//		return INVALID_SOCKET;
 
-		SubScribes(std::move(client.value()));
-	}
+	//	SubScribe(std::move(client.value()));
+	//}
+
+	return retVal;
 }
+
+// 무조건 한번에 다 받아야 함
+auto Select::ReadSet(TcpStream& stream) -> int32
+{
+	if (FD_ISSET(stream.GetSocketInfoPtr()->socket, &mReads))
+	{
+		int32 recvLen;
+		do {
+			int32 bytesRecved = recv(stream.GetSocketInfoPtr()->socket,
+				reinterpret_cast<char*>(stream.GetSocketInfoPtr()->buf), stream.GetSocketInfoPtr()->recvBytes, 0);
+
+			if (bytesRecved == SOCKET_ERROR)
+			{
+				return SOCKET_ERROR;
+			}
+			
+			recvLen += bytesRecved;
+
+		} while (recvLen < stream.GetSocketInfoPtr()->recvBytes);
+
+		stream.GetSocketInfoPtr()->recvBytes = 0;
+		return recvLen;
+	}
+
+	return -1;
+}
+
+
+auto Select::WriteSet(TcpStream& stream) -> int32
+{
+	if (FD_ISSET(stream.GetSocketInfoPtr()->socket, &mWrites))
+	{
+		int32 sendLen = 0;
+		do {
+			int32 bytesSent = send(stream.GetSocketInfoPtr()->socket,
+				reinterpret_cast<const char*>(stream.GetSocketInfoPtr()->buf + stream.GetSocketInfoPtr()->sendBytes),
+				stream.GetSocketInfoPtr()->recvBytes - stream.GetSocketInfoPtr()->sendBytes, 0);
+			if (bytesSent == SOCKET_ERROR)
+			{
+				return SOCKET_ERROR;
+			}
+
+			sendLen += bytesSent;
+
+		} while (sendLen < stream.GetSocketInfoPtr()->sendBytes);
+
+		stream.GetSocketInfoPtr()->sendBytes = 0;
+		return sendLen;
+	}
+	
+	return -1;
+}
+
+
 
 auto Select::SubScribe(TcpStream&& stream) -> bool
 {
