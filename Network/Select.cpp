@@ -22,15 +22,6 @@ auto Select::Run(TcpListener& server, const timeval* time = nullptr) -> int32
 	if (retVal == SOCKET_ERROR)
 		return SOCKET_ERROR;
 
-	//if (FD_ISSET(server.GetServerSocketPtr()->GetSocketInfoPtr()->socket, &mReads))
-	//{
-	//	auto client = server.Accept();
-	//	if (client.has_value() == false)
-	//		return INVALID_SOCKET;
-
-	//	SubScribe(std::move(client.value()));
-	//}
-
 	return retVal;
 }
 
