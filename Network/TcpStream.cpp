@@ -26,25 +26,14 @@ auto TcpStream::Connect(std::string_view addr, uint16 port) -> int
 	return connect(mSocket.socket, reinterpret_cast<SOCKADDR*>(&mSocket.addr), sizeof(mSocket.addr));
 }
 
-auto TcpStream::Recv() -> int
+auto TcpStream::Recv(uint32 offset) -> int
 {
-	return recv(mSocket.socket, reinterpret_cast<char*>(mSocket.buf), sizeof(mSocket.addr), 0);
+	return recv(mSocket.socket, reinterpret_cast<char*>(mSocket.buf + offset), MAX_BUFF_SIZE - offset, 0);
 }
 
-auto TcpStream::Send(BYTE* message) -> int
+auto TcpStream::Send(BYTE* message, uint32 msgLength, uint32 offset) -> int
 {
-	uint64 msgLength = sizeof(*message);
-	uint64 sendMsgLength = 0;
-	while (sendMsgLength < msgLength)
-	{
-		uint64 remainMsgLength = msgLength - sendMsgLength;
-		uint64 sendLength = remainMsgLength > MAX_BUFF_SIZE ? MAX_BUFF_SIZE : remainMsgLength;
-		if (SOCKET_ERROR == send(mSocket.socket, reinterpret_cast<char*>(mSocket.buf) + sendMsgLength, static_cast<int>(sendLength), 0))
-			return SOCKET_ERROR;
-		sendMsgLength += sendLength;
-	}
-
-	return sendMsgLength;
+	return send(mSocket.socket, reinterpret_cast<const char*>(message + offset), msgLength - offset, 0);
 }
 
 auto TcpStream::SetSocketOpt(int option) -> int
@@ -58,4 +47,9 @@ auto TcpStream::SetSocketOpt(int option) -> int
 auto TcpStream::GetSocketInfoPtr() -> SocketInfo*
 {
 	return &mSocket;
+}
+
+auto TcpStream::GetMaxBuffSize() -> uint32
+{
+	return MAX_BUFF_SIZE;
 }
