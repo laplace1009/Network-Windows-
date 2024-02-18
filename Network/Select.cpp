@@ -39,10 +39,9 @@ auto Select::ReadSet(TcpStream& stream) -> int32
 {
 	if (FD_ISSET(stream.GetSocketInfoPtr()->socket, &mReads))
 	{
-		int32 recvLen;
+		int32 recvLen = 0;
 		do {
-			int32 bytesRecved = recv(stream.GetSocketInfoPtr()->socket,
-				reinterpret_cast<char*>(stream.GetSocketInfoPtr()->buf), stream.GetSocketInfoPtr()->recvBytes, 0);
+			int32 bytesRecved = stream.Recv(recvLen);
 
 			if (bytesRecved == SOCKET_ERROR)
 			{
@@ -61,15 +60,15 @@ auto Select::ReadSet(TcpStream& stream) -> int32
 }
 
 
-auto Select::WriteSet(TcpStream& stream) -> int32
+auto Select::WriteSet(TcpStream& stream, BYTE* message, uint32 msgLength) -> int32
 {
+	if (msgLength == 0) return 0;
+	
 	if (FD_ISSET(stream.GetSocketInfoPtr()->socket, &mWrites))
 	{
 		int32 sendLen = 0;
 		do {
-			int32 bytesSent = send(stream.GetSocketInfoPtr()->socket,
-				reinterpret_cast<const char*>(stream.GetSocketInfoPtr()->buf + stream.GetSocketInfoPtr()->sendBytes),
-				stream.GetSocketInfoPtr()->recvBytes - stream.GetSocketInfoPtr()->sendBytes, 0);
+			int32 bytesSent = stream.Send(message, msgLength, sendLen);
 			if (bytesSent == SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;

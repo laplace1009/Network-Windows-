@@ -12,7 +12,7 @@ public:
 	auto Init() -> void;
 	auto Run(TcpListener& server, const timeval* time) -> int32;
 	auto ReadSet(TcpStream& stream) -> int32;
-	auto WriteSet(TcpStream& stream) -> int32;
+	auto WriteSet(TcpStream& stream, BYTE* message, uint32 msgLength) -> int32;
 	auto SubScribe(TcpStream&& stream) -> bool;
 
 public:
