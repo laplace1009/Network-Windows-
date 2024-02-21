@@ -2,6 +2,7 @@
 #include "Types.h"
 #include "TcpStream.h"
 #include "TcpListener.h"
+#include "IocpObj.h"
 
 class Iocp
 {
@@ -11,8 +12,8 @@ public:
 
 public:
 	auto GetHandlePtr() -> HANDLE*;
-	auto Register(TcpStream* stream) -> bool;
-	auto Dispatch() -> bool;
+	auto Register(TcpStream& stream) -> bool;
+	auto Dispatch(uint32 timeout = INFINITE) -> bool;
 
 private:
 	HANDLE mHandle;

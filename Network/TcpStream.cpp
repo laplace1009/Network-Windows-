@@ -4,10 +4,10 @@
 TcpStream::TcpStream()
 {
 	mSocket.buf = new BYTE[MAX_BUFF_SIZE + 1];
-	mSocket.socket = socket(AF_INET, SOCK_STREAM, 0);
+	mSocket.socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
 	if (mSocket.socket == INVALID_SOCKET)
-		CRASH("Socket()");
+		CRASH("WSASocket()");
 
 	memset(&mSocket.addr, 0, sizeof(mSocket.addr));
 }
