@@ -14,12 +14,6 @@ auto IocpObj::SetClient(TcpStream client) -> void
 	mClient = std::move(client);
 }
 
-auto IocpObj::Recv() -> int
-{
-	LPDWORD flags = 0;
-	return 0;
-}
-
 auto IocpObj::Send() -> int
 {
 	return 0;

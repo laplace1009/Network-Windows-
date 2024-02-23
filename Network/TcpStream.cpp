@@ -3,13 +3,15 @@
 
 TcpStream::TcpStream()
 {
-	mSocket.buf = new BYTE[MAX_BUFF_SIZE + 1];
+	mSocket.buf = new CHAR[MAX_BUFF_SIZE + 1];
+	mSocket.wsaBuf.buf = mSocket.buf;
+	mSocket.wsaBuf.len = MAX_BUFF_SIZE;
+	memset(&mSocket.overlapped, 0, sizeof(mSocket.overlapped));
+	memset(&mSocket.addr, 0, sizeof(mSocket.addr));
 	mSocket.socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 
 	if (mSocket.socket == INVALID_SOCKET)
 		CRASH("WSASocket()");
-
-	memset(&mSocket.addr, 0, sizeof(mSocket.addr));
 }
 
 TcpStream::~TcpStream() noexcept
@@ -28,12 +30,14 @@ auto TcpStream::Connect(std::string_view addr, uint16 port) -> int
 
 auto TcpStream::Recv(uint32 offset) -> int
 {
-	return recv(mSocket.socket, reinterpret_cast<char*>(mSocket.buf + offset), MAX_BUFF_SIZE - offset, 0);
+	DWORD flags = 0;
+	
+	return WSARecv(mSocket.socket, &mSocket.wsaBuf, 1, &mSocket.recvBytes, OUT & flags, &mSocket.overlapped, NULL);
 }
 
-auto TcpStream::Send(BYTE* message, uint32 msgLength, uint32 offset) -> int
+auto TcpStream::Send(CHAR* message, uint32 msgLength, uint32 offset, DWORD bufCount) -> int
 {
-	return send(mSocket.socket, reinterpret_cast<const char*>(message + offset), msgLength - offset, 0);
+	return WSASend(mSocket.socket, &mSocket.wsaBuf, bufCount, &mSocket.sendBytes, 0, &mSocket.overlapped, NULL);
 }
 
 auto TcpStream::SetSocketOpt(int option) -> int

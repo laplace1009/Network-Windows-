@@ -2,6 +2,7 @@
 #include "Types.h"
 #include <string_view>
 #include <optional>
+#include <variant>
 #include <WinSock2.h>
 
 
@@ -14,11 +15,13 @@ class TcpStream
 
 	struct SocketInfo
 	{
+		OVERLAPPED overlapped;
 		SOCKET socket;
 		SOCKADDR_IN addr;
-		BYTE* buf;
-		int recvBytes;
-		int sendBytes;
+		CHAR* buf;
+		WSABUF wsaBuf;
+		DWORD recvBytes;
+		DWORD sendBytes;
 	};
 
 public:
@@ -28,7 +31,7 @@ public:
 public:
 	auto Connect(std::string_view addr, uint16 port) -> int;
 	auto Recv(uint32 offset) -> int;
-	auto Send(BYTE* message, uint32 msgLength, uint32 offset) -> int;
+	auto Send(CHAR* message, uint32 msgLength, uint32 offset, DWORD bufCount) -> int;
 
 public:
 	auto SetSocketOpt(int option) -> int;
