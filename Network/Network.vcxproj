@@ -153,7 +153,6 @@
     </ClCompile>
     <ClCompile Include="Error.cpp" />
     <ClCompile Include="Iocp.cpp" />
-    <ClCompile Include="IocpObj.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Select.cpp" />
@@ -164,7 +163,6 @@
     <ClInclude Include="CorePch.h" />
     <ClInclude Include="Error.h" />
     <ClInclude Include="Iocp.h" />
-    <ClInclude Include="IocpObj.h" />
     <ClInclude Include="Macro.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Select.h" />

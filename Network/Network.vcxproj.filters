@@ -54,9 +54,6 @@
     <ClCompile Include="Iocp.cpp">
       <Filter>Network</Filter>
     </ClCompile>
-    <ClCompile Include="IocpObj.cpp">
-      <Filter>Network</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Macro.h">
@@ -84,9 +81,6 @@
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="Iocp.h">
-      <Filter>Network</Filter>
-    </ClInclude>
-    <ClInclude Include="IocpObj.h">
       <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
