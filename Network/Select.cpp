@@ -41,7 +41,7 @@ auto Select::ReadSet(TcpStream& stream) -> int32
 			
 			recvLen += bytesRecved;
 
-		} while (recvLen < stream.GetSocketInfoPtr()->recvBytes);
+		} while (static_cast<uint32>(recvLen) < stream.GetSocketInfoPtr()->recvBytes);
 
 		stream.GetSocketInfoPtr()->recvBytes = 0;
 		return recvLen;
@@ -51,7 +51,7 @@ auto Select::ReadSet(TcpStream& stream) -> int32
 }
 
 
-auto Select::WriteSet(TcpStream& stream, BYTE* message, uint32 msgLength) -> int32
+auto Select::WriteSet(TcpStream& stream, CHAR* message, uint32 msgLength) -> int32
 {
 	if (msgLength == 0) return 0;
 	
@@ -59,7 +59,7 @@ auto Select::WriteSet(TcpStream& stream, BYTE* message, uint32 msgLength) -> int
 	{
 		int32 sendLen = 0;
 		do {
-			int32 bytesSent = stream.Send(message, msgLength, sendLen);
+			int32 bytesSent = stream.Send(message, msgLength, sendLen, 1);
 			if (bytesSent == SOCKET_ERROR)
 			{
 				return SOCKET_ERROR;
@@ -67,7 +67,7 @@ auto Select::WriteSet(TcpStream& stream, BYTE* message, uint32 msgLength) -> int
 
 			sendLen += bytesSent;
 
-		} while (sendLen < stream.GetSocketInfoPtr()->sendBytes);
+		} while (static_cast<uint32>(sendLen) < stream.GetSocketInfoPtr()->sendBytes);
 
 		stream.GetSocketInfoPtr()->sendBytes = 0;
 		return sendLen;
