@@ -22,11 +22,13 @@ auto Iocp::Register(TcpStream& stream) -> bool
 	return CreateIoCompletionPort(reinterpret_cast<HANDLE>(stream.GetSocketInfoPtr()->socket), mHandle, stream.GetSocketInfoPtr()->socket, 0);
 }
 
-auto Iocp::Dispatch(uint32 timeout) -> bool
-{
-	DWORD bytes = 0;
-	ULONG_PTR key = 0;
-	IocpObj* obj = nullptr;
-	GetQueuedCompletionStatus(mHandle, &bytes, &key, reinterpret_cast<LPOVERLAPPED*>(&obj), timeout);
-	return false;
-}
+//auto Iocp::Dispatch(TcpStream& stream, uint32 timeout) -> bool
+//{
+//	DWORD bytes = 0;
+//	ULONG_PTR key = 0;
+//	if (GetQueuedCompletionStatus(mHandle, &bytes, &key, reinterpret_cast<LPOVERLAPPED*>(&stream.GetSocketInfoPtr()->overlapped), timeout))
+//	{
+//
+//	}
+//	return false;
+//}
