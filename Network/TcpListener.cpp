@@ -1,6 +1,14 @@
 #include "pch.h"
 #include "TcpListener.h"
 
+auto TcpListener::Init() -> bool
+{
+	if (WSAStartup(MAKEWORD(2, 2), &mWsaData) != 0)
+		return false;
+
+	return mServer.Init();
+}
+
 auto TcpListener::BindAny(uint16 port) -> void
 {
 	mServer.GetSocketInfoPtr()->addr.sin_family = AF_INET;
@@ -34,13 +42,11 @@ auto TcpListener::Bind(std::string_view addr, uint16 port) -> void
 		return;
 }
 
-auto TcpListener::Accept() -> std::optional<TcpStream>
+auto TcpListener::Accept() -> TcpStream
 {
 	TcpStream client;
 	int addrLen = sizeof(client.GetSocketInfoPtr()->addr);
 	client.GetSocketInfoPtr()->socket = accept(mServer.GetSocketInfoPtr()->socket, reinterpret_cast<SOCKADDR*>(&client.GetSocketInfoPtr()->addr), &addrLen);
-	if (client.GetSocketInfoPtr()->socket == INVALID_SOCKET)
-		return {};
 
 	return client;
 }
