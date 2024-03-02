@@ -1,7 +1,13 @@
 #include "pch.h"
 #include "TcpStream.h"
 
-TcpStream::TcpStream()
+TcpStream::~TcpStream() noexcept
+{
+	delete[] mSocket.buf;
+	closesocket(mSocket.socket);
+}
+
+auto TcpStream::Init() -> bool
 {
 	mSocket.buf = new CHAR[MAX_BUFF_SIZE + 1];
 	mSocket.wsaBuf.buf = mSocket.buf;
@@ -9,15 +15,10 @@ TcpStream::TcpStream()
 	memset(&mSocket.overlapped, 0, sizeof(mSocket.overlapped));
 	memset(&mSocket.addr, 0, sizeof(mSocket.addr));
 	mSocket.socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (mSocket.socket == SOCKET_ERROR)
+		return false;
 
-	if (mSocket.socket == INVALID_SOCKET)
-		CRASH("WSASocket()");
-}
-
-TcpStream::~TcpStream() noexcept
-{
-	delete[] mSocket.buf;
-	closesocket(mSocket.socket);
+	return true;
 }
 
 auto TcpStream::Connect(std::string_view addr, uint16 port) -> int
@@ -31,7 +32,7 @@ auto TcpStream::Connect(std::string_view addr, uint16 port) -> int
 auto TcpStream::Recv(uint32 offset) -> int
 {
 	DWORD flags = 0;
-	
+
 	return WSARecv(mSocket.socket, &mSocket.wsaBuf, 1, &mSocket.recvBytes, OUT & flags, &mSocket.overlapped, NULL);
 }
 
@@ -49,6 +50,11 @@ auto TcpStream::SetSocketOpt(int option) -> int
 }
 
 auto TcpStream::GetSocketInfoPtr() -> SocketInfo*
+{
+	return &mSocket;
+}
+
+auto TcpStream::GetSocketInfoPtr() const -> const SocketInfo*
 {
 	return &mSocket;
 }
