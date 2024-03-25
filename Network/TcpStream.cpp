@@ -1,65 +1,76 @@
 #include "pch.h"
 #include "TcpStream.h"
 
-TcpStream::~TcpStream() noexcept
+TcpStream::TcpStream() : mSocket{ 0 }
 {
-	delete[] mSocket.buf;
-	closesocket(mSocket.socket);
+	ZeroMemory(&mAddr, sizeof(mAddr));
 }
 
-auto TcpStream::Init() -> bool
+Error TcpStream::BindAny(uint16 port)
 {
-	mSocket.buf = new CHAR[MAX_BUFF_SIZE + 1];
-	mSocket.wsaBuf.buf = mSocket.buf;
-	mSocket.wsaBuf.len = MAX_BUFF_SIZE;
-	memset(&mSocket.overlapped, 0, sizeof(mSocket.overlapped));
-	memset(&mSocket.addr, 0, sizeof(mSocket.addr));
-	mSocket.socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-	if (mSocket.socket == SOCKET_ERROR)
-		return false;
-
-	return true;
+	mAddr.sin_family = AF_INET;
+	mAddr.sin_port = htons(port);
+	mAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	return bind(mSocket, reinterpret_cast<PSOCKADDR>(&mAddr), sizeof(mAddr)) == 0 ? Error::OK : Error::NET_BIND_ERROR;
 }
 
-auto TcpStream::Connect(std::string_view addr, uint16 port) -> int
+Error TcpStream::Bind(std::string addr, uint16 port)
 {
-	mSocket.addr.sin_family = AF_INET;
-	inet_pton(AF_INET, addr.data(), &mSocket.addr.sin_addr);
-	mSocket.addr.sin_port = htons(port);
-	return connect(mSocket.socket, reinterpret_cast<SOCKADDR*>(&mSocket.addr), sizeof(mSocket.addr));
+	TcpStream::SetAddr(addr, port);
+	return bind(mSocket, reinterpret_cast<PSOCKADDR>(&mAddr), sizeof(mAddr)) == 0 ? Error::OK : Error::NET_BIND_ERROR;
 }
 
-auto TcpStream::Recv(uint32 offset) -> int
-{
-	DWORD flags = 0;
 
-	return WSARecv(mSocket.socket, &mSocket.wsaBuf, 1, &mSocket.recvBytes, OUT & flags, &mSocket.overlapped, NULL);
+Error TcpStream::Connect(DWORD* bytes)
+{
+	return connect(mSocket, reinterpret_cast<PSOCKADDR>(&mAddr), sizeof(mAddr)) == 0 ? Error::OK : Error::NET_BIND_ERROR;
 }
 
-auto TcpStream::Send(CHAR* message, uint32 msgLength, uint32 offset, DWORD bufCount) -> int
+Error TcpStream::Recv(WSABUF* buf, DWORD* bytes)
 {
-	return WSASend(mSocket.socket, &mSocket.wsaBuf, bufCount, &mSocket.sendBytes, 0, &mSocket.overlapped, NULL);
+	return recv(mSocket, buf->buf, buf->len, 0) != SOCKET_ERROR ? Error::OK : Error::NET_RECV_ERROR;
 }
 
-auto TcpStream::SetSocketOpt(int option) -> int
+Error TcpStream::Send(WSABUF* buf, DWORD* bytes, CHAR* msg, size_t size)
 {
-	int optVal = true;
-	int optLen = sizeof(int);
-
-	return setsockopt(mSocket.socket, SOL_SOCKET, option, reinterpret_cast<char*>(&optVal), optLen);
+	return send(mSocket, buf->buf, buf->len, 0) != SOCKET_ERROR ? Error::OK : Error::NET_SEND_ERROR;
 }
 
-auto TcpStream::GetSocketInfoPtr() -> SocketInfo*
+const SOCKET TcpStream::ConstGetSocket() const
 {
-	return &mSocket;
+	return mSocket;
 }
 
-auto TcpStream::GetSocketInfoPtr() const -> const SocketInfo*
+SOCKET& TcpStream::GetSocketRef()
 {
-	return &mSocket;
+	return mSocket;
 }
 
-auto TcpStream::GetMaxBuffSize() -> uint32
+SOCKADDR_IN& TcpStream::GetAddrRef()
 {
-	return MAX_BUFF_SIZE;
+	return mAddr;
+}
+
+auto TcpStream::SetAddr(std::string addr, uint16 port) -> void
+{
+	mAddr.sin_family = AF_INET;
+	mAddr.sin_port = htons(port);
+	inet_pton(AF_INET, addr.c_str(), &mAddr);
+}
+
+auto TcpStream::SocketConnectUpdate() -> Error
+{
+	return SetSocketOpt<int>(this, SO_UPDATE_CONNECT_CONTEXT, NULL, 0);
+}
+
+auto TcpStream::SocketReuseAddr() -> Error
+{
+	bool flag{ true };
+	return SetSocketOpt<bool>(this, SO_REUSEADDR, &flag, sizeof(bool));
+}
+
+auto TcpStream::SocketTcpNoDelay() -> Error
+{
+	bool flag{ true };
+	return SetSocketOpt<bool>(this, TCP_NODELAY, &flag, sizeof(bool));
 }

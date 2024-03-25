@@ -1,73 +1,70 @@
 #include "pch.h"
 #include "TcpListener.h"
 
-auto TcpListener::Init() -> bool
+Error TcpListener::BindAny(uint16 port)
 {
-	if (WSAStartup(MAKEWORD(2, 2), &mWsaData) != 0)
-		return false;
-
-	return mServer.Init();
+	return mListener.BindAny(port);
 }
 
-auto TcpListener::BindAny(uint16 port) -> void
+Error TcpListener::Bind(std::string addr, uint16 port)
 {
-	mServer.GetSocketInfoPtr()->addr.sin_family = AF_INET;
-	mServer.GetSocketInfoPtr()->addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	mServer.GetSocketInfoPtr()->addr.sin_port = htons(port);
-	if (SOCKET_ERROR == bind(mServer.GetSocketInfoPtr()->socket, reinterpret_cast<SOCKADDR*>(&mServer.GetSocketInfoPtr()->addr), sizeof(mServer.GetSocketInfoPtr()->addr)))
-		return;
-
-	if (SOCKET_ERROR == listen(mServer.GetSocketInfoPtr()->socket, SOMAXCONN))
-		return;
+	return mListener.Bind(addr, port);
 }
 
-auto TcpListener::Bind(std::string_view addr, uint16 port) -> void
+Error TcpListener::Connect(DWORD* bytes)
 {
-	mServer.GetSocketInfoPtr()->addr.sin_family = AF_INET;
-	mServer.GetSocketInfoPtr()->addr.sin_port = htons(port);
-	int isSuccess = inet_pton(AF_INET, addr.data(), &mServer.GetSocketInfoPtr()->addr);
-	// wrong string address
-	if (0 == isSuccess)
-	{
-		return;
-	}
-	// internal error
-	if (-1 == isSuccess)
-	{
-		return;
-	}
-	if (SOCKET_ERROR == bind(mServer.GetSocketInfoPtr()->socket, reinterpret_cast<SOCKADDR*>(&mServer.GetSocketInfoPtr()->addr), sizeof(mServer.GetSocketInfoPtr()->addr)))
-		return;
-	if (SOCKET_ERROR == listen(mServer.GetSocketInfoPtr()->socket, SOMAXCONN))
-		return;
+	return SOCKET_ERROR != ::connect(mListener.ConstGetSocket(), reinterpret_cast<SOCKADDR*> (&mListener.GetEndpointRef().GetAddrRef()), sizeof(SOCKADDR_IN)) ? Error::OK : Error::NET_CONNECT_ERROR;
 }
 
-auto TcpListener::Accept() -> TcpStream
+Error TcpListener::Accept()
 {
-	TcpStream client;
-	int addrLen = sizeof(client.GetSocketInfoPtr()->addr);
-	client.GetSocketInfoPtr()->socket = accept(mServer.GetSocketInfoPtr()->socket, reinterpret_cast<SOCKADDR*>(&client.GetSocketInfoPtr()->addr), &addrLen);
-
-	return client;
+	TcpStream* client = new TcpStream();
+	int addrLen = sizeof(SOCKADDR_IN);
+	return ::accept(mListener.GetEndpointRef().ConstGetSocket(), reinterpret_cast<PSOCKADDR>(&client->GetAddrRef()), &addrLen) != INVALID_SOCKET ? Error::OK : Error::NET_ACCEPT_ERROR;
 }
 
-auto TcpListener::Recv(OUT TcpStream* client) -> int
+Error TcpListener::Recv(WSABUF* buf, DWORD* bytes)
 {
-	return recv(client->GetSocketInfoPtr()->socket, reinterpret_cast<char*>(client->GetSocketInfoPtr()->buf), sizeof(client->GetSocketInfoPtr()->addr), 0);
+	return mListener.Recv();
 }
 
-auto TcpListener::Send(TcpStream* client, int retVal) -> int
+Error TcpListener::Send(WSABUF* buf, DWORD* bytes, CHAR* msg, size_t size)
 {
-	return send(client->GetSocketInfoPtr()->socket, reinterpret_cast<char*>(client->GetSocketInfoPtr()->buf), retVal, 0);
+	return mListener.Send(buf);
 }
 
-auto TcpListener::SwitchSyncAsync(u_long swt) -> int
+auto TcpListener::Accept(TcpEndpoint* client) -> Error
 {
-	return ioctlsocket(mServer.GetSocketInfoPtr()->socket, FIONBIO, &swt);
+	int addrLen = sizeof(SOCKADDR_IN);
+	return INVALID_SOCKET != ::accept(mListener.GetEndpointRef().ConstGetSocket(), reinterpret_cast<PSOCKADDR>(&client->GetEndpointRef().GetAddrRef()), &addrLen) ? Error::OK : Error::NET_ACCEPT_ERROR;
 }
 
-auto TcpListener::GetServerSocketPtr() -> TcpStream*
+auto TcpListener::Send(TcpEndpoint* dest, CHAR* msg, size_t size) -> Error
 {
-	return &mServer;
+	return SOCKET_ERROR != ::send(dest->GetEndpointRef().ConstGetSocket(), msg, static_cast<int>(size), 0) ? Error::OK : Error::NET_SEND_ERROR;
 }
 
+const SOCKET TcpListener::ConstGetSocket() const
+{
+	return mListener.ConstGetEndPointRef().ConstGetSocket();
+}
+
+SOCKET& TcpListener::GetSocketRef()
+{
+	return mListener.GetEndpointRef().GetSocketRef();
+}
+
+SOCKADDR_IN& TcpListener::GetAddrRef()
+{
+	return mListener.GetEndpointRef().GetAddrRef();
+}
+
+auto TcpListener::SetSocket(SOCKET socket) -> void
+{
+	mListener.GetEndpointRef().GetSocketRef() = socket;
+}
+
+auto TcpListener::SetTransferredBytes(DWORD bytes) -> void
+{
+	mListener.GetTransferredBytesRef() = bytes;
+}

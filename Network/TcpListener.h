@@ -1,21 +1,32 @@
 #pragma once
-#include <string_view>
 #include "TcpStream.h"
+#include "Error.h"
+#include "Listener.h"
+#include "NetworkEndpoint.h"
 
-class TcpListener
+class TcpListener : public Listener
 {
 public:
-	auto Init() -> bool;
-	auto BindAny(uint16 port) -> void;
-	auto Bind(std::string_view addr, uint16 port) -> void;
-	auto Accept() -> TcpStream;
-	auto Recv(OUT TcpStream* client) -> int;
-	auto Send(TcpStream* client, int retVal) -> int;
-	auto SwitchSyncAsync(u_long swt) -> int;
-	auto GetServerSocketPtr() -> TcpStream*;
+	Error BindAny(uint16 port)										override;
+	Error Bind(std::string addr, uint16 port)						override;
+	Error Connect(DWORD* bytes)										override;
+	Error Accept()													override;
+	Error Recv(WSABUF* buf, DWORD* bytes)							override;
+	Error Send(WSABUF* buf, DWORD* bytes, CHAR* msg, size_t size)	override;
+
+public:
+	auto Accept(TcpEndpoint* client) -> Error;
+	auto Send(TcpEndpoint* dest, CHAR* msg, size_t size) -> Error;
+
+public:
+	const SOCKET ConstGetSocket() const	override;
+	SOCKET& GetSocketRef()				override;
+	SOCKADDR_IN& GetAddrRef()			override;
+
+public:
+	auto SetSocket(SOCKET socket) -> void;
+	auto SetTransferredBytes(DWORD bytes) -> void;
 
 private:
-	WSADATA mWsaData;
-	TcpStream mServer;
+	TcpEndpoint mListener;
 };
-

@@ -1,45 +1,36 @@
 #pragma once
 #include "Types.h"
-#include <string_view>
-#include <optional>
-#include <variant>
+#include "Network.h"
+#include "Memory.h"
+#include <string>
 #include <WinSock2.h>
 
-
-class TcpStream
+class alignas(16) TcpStream : public Network
 {
-	enum
-	{
-		MAX_BUFF_SIZE = 4096,
-	};
-
-	struct SocketInfo
-	{
-		OVERLAPPED overlapped;
-		SOCKET socket;
-		SOCKADDR_IN addr;
-		CHAR* buf;
-		WSABUF wsaBuf;
-		DWORD recvBytes;
-		DWORD sendBytes;
-	};
+public:
+	TcpStream();
+	~TcpStream() noexcept override = default;
 
 public:
-	~TcpStream() noexcept;
+	Error BindAny(uint16 port)										override;
+	Error Bind(std::string addr, uint16 port)						override;
+	Error Connect(DWORD* bytes)										override;
+	Error Recv(WSABUF* buf, DWORD* bytes)							override;
+	Error Send(WSABUF* buf, DWORD* bytes, CHAR* msg, size_t size)	override;
 
 public:
-	auto Init() -> bool;
-	auto Connect(std::string_view addr, uint16 port) -> int;
-	auto Recv(uint32 offset) -> int;
-	auto Send(CHAR* message, uint32 msgLength, uint32 offset, DWORD bufCount) -> int;
+	const SOCKET	ConstGetSocket() const	override;
+	SOCKET& GetSocketRef()			override;
+	SOCKADDR_IN& GetAddrRef()			override;
 
 public:
-	auto SetSocketOpt(int option) -> int;
-	auto GetSocketInfoPtr() -> SocketInfo*;
-	auto GetSocketInfoPtr() const -> const SocketInfo*;
-	auto GetMaxBuffSize() -> uint32;
+	auto SetAddr(std::string addr, uint16 port) -> void;
+	auto SocketConnectUpdate() -> Error;
+	auto SocketReuseAddr() -> Error;
+	auto SocketTcpNoDelay() -> Error;
 
 private:
-	SocketInfo mSocket;
+	SOCKET		mSocket;
+	SOCKADDR_IN mAddr;
 };
 

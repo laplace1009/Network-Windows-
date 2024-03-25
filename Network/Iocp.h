@@ -1,20 +1,9 @@
 #pragma once
-#include "Types.h"
-#include "TcpStream.h"
-#include "TcpListener.h"
+#include "NetworkEndpoint.h"
 
-class Iocp
+class IOCP
 {
-public:
-	Iocp();
-	~Iocp();
-
-public:
-	auto GetHandlePtr() -> HANDLE*;
-	auto Register(TcpStream& stream) -> bool;
-	//auto Dispatch(TcpStream& stream, uint32 timeout = INFINITE) -> bool;
-
-private:
-	HANDLE mHandle;
+	virtual Error Register(LPAsyncEndpoint socket) = 0;
+	virtual Error Dispatch() = 0;
 };
 

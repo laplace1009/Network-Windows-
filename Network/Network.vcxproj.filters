@@ -26,7 +26,7 @@
       <UniqueIdentifier>{2ba70c5e-24b5-4748-bb86-c0704f38bce4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Error">
-      <UniqueIdentifier>{3323ba72-9648-46ab-b9f9-a2812af0cf16}</UniqueIdentifier>
+      <UniqueIdentifier>{9488f9d6-e289-4927-be64-ee9f52b048b4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -45,13 +45,22 @@
     <ClCompile Include="CorePch.cpp">
       <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="Error.cpp">
-      <Filter>Error</Filter>
-    </ClCompile>
-    <ClCompile Include="Select.cpp">
+    <ClCompile Include="Network.cpp">
       <Filter>Network</Filter>
     </ClCompile>
-    <ClCompile Include="Iocp.cpp">
+    <ClCompile Include="NetworkEndpoint.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="Listener.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="AsyncStream.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="AsyncListener.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="IOCP.cpp">
       <Filter>Network</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,10 +86,22 @@
     <ClInclude Include="Error.h">
       <Filter>Error</Filter>
     </ClInclude>
-    <ClInclude Include="Select.h">
+    <ClInclude Include="Network.h">
       <Filter>Network</Filter>
     </ClInclude>
-    <ClInclude Include="Iocp.h">
+    <ClInclude Include="NetworkEndpoint.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Listener.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncStream.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="AsyncListener.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="IOCP.h">
       <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
